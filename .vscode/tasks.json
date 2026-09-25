@@ -1,0 +1,42 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start PostgreSQL",
+      "type": "process",
+      "command": "docker",
+      "args": ["compose", "up", "-d", "--wait", "db"],
+      "problemMatcher": []
+    },
+    {
+      "label": "Build API",
+      "type": "process",
+      "command": "npm.cmd",
+      "args": ["run", "build:api"],
+      "problemMatcher": ["$tsc"]
+    },
+    {
+      "label": "Prepare API",
+      "dependsOn": ["Start PostgreSQL", "Build API"],
+      "dependsOrder": "sequence",
+      "problemMatcher": []
+    },
+    {
+      "label": "Start Vite",
+      "type": "process",
+      "command": "npm.cmd",
+      "args": ["run", "dev:web"],
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "vite",
+        "pattern": {
+          "regexp": "^$"
+        },
+        "background": {
+          "activeOnStart": true,
+          "endsPattern": "VITE .* ready in .*"
+        }
+      }
+    }
+  ]
+}

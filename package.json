@@ -1,0 +1,43 @@
+{
+  "name": "athena",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently -k -n api,web \"npm:dev:api\" \"npm:dev:web\"",
+    "build": "npm run build:api && tsc -b && vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,css,html}\" \"api/src/**/*.{ts,js}\" \"docs/**/*.md\" .vscode/*.json vite.config.ts index.html README.md",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,css,html}\" \"api/src/**/*.{ts,js}\" \"docs/**/*.md\" .vscode/*.json vite.config.ts index.html README.md",
+    "dev:api": "cross-env TSX_TSCONFIG_PATH=api/tsconfig.json tsx watch api/src/main.ts",
+    "dev:web": "vite --host 0.0.0.0",
+    "start:api": "node api/dist/main.js",
+    "build:api": "tsc -p api/tsconfig.json"
+  },
+  "dependencies": {
+    "@nestjs/common": "^12.1.0",
+    "@nestjs/core": "^12.1.0",
+    "@nestjs/platform-fastify": "^12.1.0",
+    "@nestjs/typeorm": "^12.0.1",
+    "dotenv": "^18.0.4",
+    "lucide-react": "^0.468.0",
+    "pg": "^8.23.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2",
+    "typeorm": "^1.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.2",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "@vitejs/plugin-react": "^4.5.0",
+    "concurrently": "^10.0.5",
+    "cross-env": "^10.1.0",
+    "prettier": "^3.9.9",
+    "tsx": "^4.23.15",
+    "typescript": "~5.8.3",
+    "vite": "^6.3.5"
+  }
+}

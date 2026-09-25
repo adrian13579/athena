@@ -1,0 +1,34 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Athena API",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/api/dist/main.js",
+      "cwd": "${workspaceFolder}",
+      "console": "internalConsole",
+      "internalConsoleOptions": "openOnSessionStart",
+      "outputCapture": "std",
+      "sourceMaps": true,
+      "skipFiles": ["<node_internals>/**"],
+      "preLaunchTask": "Prepare API",
+      "outFiles": ["${workspaceFolder}/**/*.js", "!**/node_modules/**"]
+    },
+    {
+      "name": "Athena in Chrome",
+      "type": "pwa-chrome",
+      "request": "launch",
+      "url": "http://localhost:5173",
+      "webRoot": "${workspaceFolder}",
+      "preLaunchTask": "Start Vite"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Debug Athena (full stack)",
+      "configurations": ["Athena API", "Athena in Chrome"],
+      "stopAll": true
+    }
+  ]
+}
