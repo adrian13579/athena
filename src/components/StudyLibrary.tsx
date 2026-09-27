@@ -28,13 +28,14 @@ export default function StudyLibrary({
   const [layout, setLayout] = useState<'grid' | 'list'>('grid');
   const [sort, setSort] = useState('recent');
   const [filter, setFilter] = useState('All studies');
+  const normalizedQuery = query.trim().toLowerCase();
   const categories = ['All studies', ...new Set(studies.map((study) => study.category))];
   const visible = studies
     .filter(
       (study) =>
         `${study.title} ${study.description} ${study.category}`
           .toLowerCase()
-          .includes(query.toLowerCase()) &&
+          .includes(normalizedQuery) &&
         (filter === 'All studies' || study.category === filter),
     )
     .sort((a, b) =>
@@ -53,7 +54,7 @@ export default function StudyLibrary({
         </button>
       </div>
       <div className="toolbar">
-        <label className="search">
+        <label className={`search ${normalizedQuery ? 'has-query' : ''}`}>
           <Search size={18} />
           <input
             aria-label="Search studies"
@@ -61,6 +62,12 @@ export default function StudyLibrary({
             value={query}
             onChange={(event) => setQuery(event.target.value)}
           />
+          {normalizedQuery && (
+            <span className="search-active-indicator" role="status">
+              <span aria-hidden="true" />
+              Filtering
+            </span>
+          )}
           {query && (
             <button className="clear-search" aria-label="Clear search" onClick={() => setQuery('')}>
               <X size={15} />

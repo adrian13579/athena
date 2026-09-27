@@ -15,9 +15,11 @@ type Edge = [number, number];
 export default function KnowledgeGraph({
   studies,
   onSelect,
+  theme,
 }: {
   studies: Study[];
   onSelect: (study: Study) => void;
+  theme: 'dark' | 'white';
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const selectRef = useRef(onSelect);
@@ -32,6 +34,7 @@ export default function KnowledgeGraph({
 
     const graphCanvas = canvas;
     const drawingContext = context;
+    const graphColors = getComputedStyle(graphCanvas);
 
     const count = studiesRef.current.length;
     const nodes: GraphNode[] = Array.from({ length: count }, (_, index) => {
@@ -212,7 +215,7 @@ export default function KnowledgeGraph({
         drawingContext!.moveTo(nodes[from].x, nodes[from].y);
         drawingContext!.lineTo(nodes[to].x, nodes[to].y);
       });
-      drawingContext!.strokeStyle = '#b8b8b8';
+      drawingContext!.strokeStyle = graphColors.getPropertyValue('--graph-edge').trim();
       drawingContext!.lineWidth = 1.25 / view.zoom;
       drawingContext!.stroke();
 
@@ -220,7 +223,9 @@ export default function KnowledgeGraph({
         const active = index === hovered || index === dragged;
         drawingContext!.beginPath();
         drawingContext!.arc(node.x, node.y, node.radius + (active ? 2 : 0), 0, Math.PI * 2);
-        drawingContext!.fillStyle = active ? '#444' : '#111';
+        drawingContext!.fillStyle = graphColors
+          .getPropertyValue(active ? '--graph-node-active' : '--graph-node')
+          .trim();
         drawingContext!.shadowColor = active ? '#00000033' : 'transparent';
         drawingContext!.shadowBlur = active ? 12 / view.zoom : 0;
         drawingContext!.fill();
@@ -230,7 +235,9 @@ export default function KnowledgeGraph({
         drawingContext!.font = `${active ? 500 : 400} ${12 / view.zoom}px system-ui, sans-serif`;
         drawingContext!.textAlign = 'center';
         drawingContext!.textBaseline = 'top';
-        drawingContext!.fillStyle = active ? '#111' : '#555';
+        drawingContext!.fillStyle = graphColors
+          .getPropertyValue(active ? '--graph-label-active' : '--graph-label')
+          .trim();
         drawingContext!.fillText(title, node.x, node.y + node.radius + 9 / view.zoom);
       });
       drawingContext!.restore();
@@ -252,7 +259,7 @@ export default function KnowledgeGraph({
       graphCanvas.removeEventListener('pointercancel', handlePointerUp);
       graphCanvas.removeEventListener('wheel', handleWheel);
     };
-  }, []);
+  }, [theme]);
 
   return (
     <div className="graph-scene">

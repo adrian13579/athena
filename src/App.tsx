@@ -1,4 +1,4 @@
-import React, { Suspense, useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import type { Study } from './studies';
 import AppHeader, { type AppSection } from './components/AppHeader';
 import StudyChat, { welcomeMessage, type ChatMessage } from './components/StudyChat';
@@ -9,14 +9,32 @@ import { sendStudyMessage } from './chat';
 
 const KnowledgeGraph = React.lazy(() => import('./KnowledgeGraph'));
 type DialogMode = 'create' | 'help' | null;
+type Theme = 'dark' | 'white';
+
+function savedTheme(): Theme {
+  try {
+    return window.localStorage.getItem('athena-theme') === 'dark' ? 'dark' : 'white';
+  } catch {
+    return 'white';
+  }
+}
 
 export default function App() {
+  const [theme, setTheme] = useState<Theme>(savedTheme);
   const [section, setSection] = useState<AppSection>('studies');
   const [selectedStudy, setSelectedStudy] = useState<Study | null>(null);
   const [conversations, setConversations] = useState<Record<string, ChatMessage[]>>({});
   const [chatPending, setChatPending] = useState(false);
   const [dialogMode, setDialogMode] = useState<DialogMode>(null);
   const { studies, loadState, online, canCreate, addStudy, retry, markUnavailable } = useStudies();
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem('athena-theme', theme);
+    } catch {
+      // Theme still applies for this session if storage is unavailable.
+    }
+  }, [theme]);
 
   function navigate(nextSection: AppSection) {
     setSection(nextSection);
@@ -81,13 +99,15 @@ export default function App() {
   }
 
   return (
-    <div className="app">
+    <div className="app" data-theme={theme}>
       {!selectedStudy && (
         <AppHeader
           section={section}
           studyCount={studies.length}
           onNavigate={navigate}
           onHelp={() => setDialogMode('help')}
+          theme={theme}
+          onThemeChange={setTheme}
         />
       )}
       <main className={selectedStudy ? 'study-chat-main' : section === 'graph' ? 'graph-main' : ''}>
@@ -101,7 +121,7 @@ export default function App() {
           />
         ) : (
           <>
-            <div hidden={section !== 'studies'}>
+            <div className="section-panel" hidden={section !== 'studies'}>
               <StudyLibrary
                 studies={studies}
                 canCreate={canCreate}
@@ -112,7 +132,7 @@ export default function App() {
             {section === 'graph' && (
               <section className="workspace graph-workspace">
                 <Suspense fallback={null}>
-                  <KnowledgeGraph studies={studies} onSelect={openStudy} />
+                  <KnowledgeGraph studies={studies} onSelect={openStudy} theme={theme} />
                 </Suspense>
               </section>
             )}

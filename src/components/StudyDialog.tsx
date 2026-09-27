@@ -150,8 +150,8 @@ export default function StudyDialog({
           </span>
           <h2>Help</h2>
           <p>
-            Create studies to organize topics you’re exploring. Use the Knowledge Graph to browse
-            your collection.
+            Create studies to organize topics you’re exploring. Use Knowledge to browse your
+            collection.
           </p>
           <p>
             Your studies are saved to PostgreSQL. A server connection is required to load and create
