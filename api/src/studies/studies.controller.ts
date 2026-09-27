@@ -1,5 +1,5 @@
 import { Body, Controller, Get, GoneException, Inject, Post, Put } from '@nestjs/common';
-import { StudiesService } from './studies.service';
+import { StudiesService } from './studies.service.js';
 
 @Controller('studies')
 export class StudiesController {

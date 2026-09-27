@@ -9,7 +9,7 @@ import {
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { StudyEntity } from '../studies/study.entity';
+import { StudyEntity } from '../studies/study.entity.js';
 
 @Entity({ name: 'concepts' })
 @Index('concepts_name_domain_unique', ['name', 'domain'], { unique: true })

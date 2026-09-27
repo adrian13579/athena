@@ -13,7 +13,7 @@
     "dev:web": "vite --host 0.0.0.0",
     "start:api": "node api/dist/main.js",
     "build:api": "tsc -p api/tsconfig.json",
-    "test:studies": "npm run build:api && node --test api/test/studies.test.cjs",
+    "test:studies": "npm run build:api && node --test api/test/studies.test.mjs",
     "test:client": "tsx --test --test-timeout=30000 tests/studies-ui.test.tsx"
   },
   "dependencies": {

@@ -1,26 +1,24 @@
-require('reflect-metadata');
-const { test } = require('node:test');
-const assert = require('node:assert/strict');
-const { randomUUID } = require('node:crypto');
-const { Client } = require('pg');
-const { DataSource } = require('typeorm');
-const { Module } = require('@nestjs/common');
-const { NestFactory } = require('@nestjs/core');
-const { FastifyAdapter } = require('@nestjs/platform-fastify');
-const { StudiesController } = require('../dist/studies/studies.controller');
-const { StudiesService } = require('../dist/studies/studies.service');
-const { StudyEntity } = require('../dist/studies/study.entity');
-const {
+import 'reflect-metadata';
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { randomUUID } from 'node:crypto';
+import { Client } from 'pg';
+import { DataSource } from 'typeorm';
+import { Module } from '@nestjs/common';
+import { NestFactory } from '@nestjs/core';
+import { FastifyAdapter } from '@nestjs/platform-fastify';
+import { StudiesController } from '../dist/studies/studies.controller.js';
+import { StudiesService } from '../dist/studies/studies.service.js';
+import { StudyEntity } from '../dist/studies/study.entity.js';
+import {
   knowledgeEntities,
   ConceptEntity,
   StudyConceptEntity,
   LearningEvidenceEntity,
-} = require('../dist/knowledge/knowledge.entities');
-const { CreateStudies1790294400000 } = require('../dist/database/create-studies.migration');
-const {
-  CreateKnowledgeGraph1790371200000,
-} = require('../dist/database/create-knowledge-graph.migration');
-const { ResetStudies1790460800000 } = require('../dist/database/reset-studies.migration');
+} from '../dist/knowledge/knowledge.entities.js';
+import { CreateStudies1790294400000 } from '../dist/database/create-studies.migration.js';
+import { CreateKnowledgeGraph1790371200000 } from '../dist/database/create-knowledge-graph.migration.js';
+import { ResetStudies1790460800000 } from '../dist/database/reset-studies.migration.js';
 
 // Always provision a new database: never migrate or reset the supplied administration database.
 test('Study migration, API contract, and persistent storage', async (t) => {

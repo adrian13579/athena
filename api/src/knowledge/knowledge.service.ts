@@ -10,8 +10,8 @@ import {
   LearningEvidenceEntity,
   MisconceptionEntity,
   StudyConceptEntity,
-} from './knowledge.entities';
-import { StudyEntity } from '../studies/study.entity';
+} from './knowledge.entities.js';
+import { StudyEntity } from '../studies/study.entity.js';
 
 const relationshipTypes = [
   'PREREQUISITE',

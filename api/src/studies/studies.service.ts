@@ -1,7 +1,7 @@
 import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { StudyEntity } from './study.entity';
+import { StudyEntity } from './study.entity.js';
 
 function parseStudy(input: unknown) {
   if (!input || typeof input !== 'object' || Array.isArray(input))

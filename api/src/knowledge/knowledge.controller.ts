@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
-import { KnowledgeService } from './knowledge.service';
+import { KnowledgeService } from './knowledge.service.js';
 
 @Controller()
 export class KnowledgeController {
