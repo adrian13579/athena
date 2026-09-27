@@ -28,6 +28,7 @@
     {
       "name": "Debug Athena (full stack)",
       "configurations": ["Athena API", "Athena in Chrome"],
+      "preLaunchTask": "Stop existing app ports",
       "stopAll": true
     }
   ]
