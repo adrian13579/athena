@@ -11,7 +11,7 @@ A React + TypeScript learning workspace with Studies and an interactive Knowledg
 
 The web app runs at `http://localhost:5173`; Vite forwards `/api` requests to the API on port 3001. TypeORM runs versioned migrations at API startup. Studies start empty; browser data is never imported. The Compose database uses a named volume, so its data remains after the container stops.
 
-The API exposes `GET /api/health`, `GET /api/studies`, and `POST /api/studies`. Set `DATABASE_URL` and optionally `API_PORT` in `.env` to connect to another PostgreSQL instance. See [API and database](docs/api.md) for the routes and persistence setup.
+The API exposes `GET /api/health`, `GET /api/studies`, `POST /api/studies`, and `POST /api/chat/study`. StudyChat uses a LangGraph flow and the LangChain OpenRouter integration. Add an OpenRouter key as `OPENROUTER_API_KEY` in the API server's `.env`; optionally set `OPENROUTER_MODEL` to any model ID supported by OpenRouter. The default is `openai/gpt-4o-mini`. The API key stays on the server and is never sent to the browser.
 
 ## VS Code debugging
 

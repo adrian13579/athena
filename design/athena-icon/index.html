@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Athena — a* icon study</title>
+    <style>
+      * { box-sizing: border-box; }
+      body { margin: 0; background: #fff; color: #000; font-family: Arial, Helvetica, sans-serif; }
+      main { max-width: 1280px; padding: 64px 64px 48px; margin: auto; }
+      .eyebrow { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; }
+      header { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid #ddd; padding-bottom: 28px; }
+      h1 { font-size: 46px; line-height: 1.1; font-weight: 500; letter-spacing: -2px; margin: 18px 0 12px; }
+      p { color: #666; font-size: 14px; line-height: 1.6; margin: 0; }
+      .concepts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; padding: 32px 0 40px; border-bottom: 1px solid #ddd; }
+      .number { font-size: 11px; letter-spacing: 1px; color: #666; }
+      .mark { height: 224px; display: grid; place-items: center; }
+      .mark img { width: 144px; height: 144px; }
+      h2 { font-size: 18px; font-weight: 500; letter-spacing: -.4px; margin: 0 0 10px; }
+      .badge { display: inline-block; font-size: 10px; border: 1px solid #000; border-radius: 20px; padding: 4px 8px; margin-left: 8px; vertical-align: middle; }
+      .applications { display: grid; grid-template-columns: 1.15fr 1fr 1fr; gap: 24px; margin-top: 30px; }
+      .sample { height: 132px; display: flex; align-items: center; justify-content: center; gap: 12px; background: #f5f5f5; margin-bottom: 14px; }
+      .inverse { background: #000; }
+      .wordmark { font-size: 31px; font-weight: 500; letter-spacing: -1.5px; }
+      .sizes { gap: 22px; align-items: baseline; padding-top: 40px; }
+      .sizes figure { margin: 0; text-align: center; }
+      figcaption { font-size: 10px; color: #666; margin-top: 10px; }
+      .label { font-size: 11px; color: #666; }
+      footer { display: flex; justify-content: space-between; gap: 24px; margin-top: 40px; }
+      footer p { max-width: 690px; font-size: 12px; }
+      a { color: inherit; text-underline-offset: 3px; }
+      a:focus-visible { outline: 2px solid; outline-offset: 4px; }
+      .downloads { margin-top: 28px; display: flex; flex-wrap: wrap; gap: 20px; font-size: 12px; }
+      @media (max-width: 700px) {
+        main { padding: 28px 24px; }
+        header { display: block; }
+        h1 { font-size: 38px; }
+        header > .eyebrow { display: none; }
+        .concepts, .applications { grid-template-columns: 1fr; gap: 28px; }
+        .mark { height: 190px; }
+        footer { display: block; }
+        footer > .eyebrow { margin-top: 20px; }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div><div class="eyebrow">Athena / Lowercase identity</div><h1>A little mark. An open question.</h1><p>a* — finding a way forward through learning.</p></div>
+        <div class="eyebrow">Black / White / 02</div>
+      </header>
+      <section class="concepts" aria-label="Lowercase asterisk identity">
+        <article><div class="number">01 / THE MARK</div><div class="mark"><img src="athena-mark.svg" alt="Bold rounded lowercase a with a raised six-ray asterisk" /></div><h2>Curiosity, in lowercase</h2><p>A rounded a with a true asterisk.<br />Approachable, confident, and unmistakably Athena.</p></article>
+        <article><div class="number">02 / INVERSE</div><div class="mark" style="background:#000;margin:20px 0;height:184px"><img src="athena-mark-white.svg" alt="White lowercase a asterisk on black" /></div><h2>One shape. Two tones.</h2><p>Pure black and white.<br />A clear silhouette for light and dark surfaces.</p></article>
+        <article><div class="number">03 / APP ICON</div><div class="mark"><img src="athena-app-icon.svg" alt="White lowercase a asterisk inside a black rounded square" /></div><h2>A place to begin</h2><p>A compact tile for your learning workspace.<br />Generous space keeps the mark easy to recognize.</p></article>
+      </section>
+      <section class="applications" aria-label="Recommended mark in use">
+        <div><div class="sample"><img src="athena-mark.svg" width="44" height="44" alt="" /><span class="wordmark">athena.</span></div><div class="label">Header / existing wordmark pairing</div></div>
+        <div><div class="sample inverse"><img src="athena-mark-white.svg" width="82" height="82" alt="White Athena mark on black" /></div><div class="label">Inverse / the same geometry in white</div></div>
+        <div><div class="sample sizes"><figure><img src="athena-favicon.svg" width="16" height="16" alt="Athena favicon at 16 pixels" /><figcaption>16</figcaption></figure><figure><img src="athena-favicon.svg" width="24" height="24" alt="Athena favicon at 24 pixels" /><figcaption>24</figcaption></figure><figure><img src="athena-app-icon.svg" width="32" height="32" alt="Athena app icon at 32 pixels" /><figcaption>32</figcaption></figure><figure><img src="athena-app-icon.svg" width="48" height="48" alt="Athena app icon at 48 pixels" /><figcaption>48</figcaption></figure></div><div class="label">Actual sizes / optically adjusted favicon</div></div>
+      </section>
+      <footer><p><strong>Why a*?</strong> The a names Athena. The asterisk leaves room for more: a new connection, a better question, another step toward understanding. Together they echo the idea of searching for a path.</p><div class="eyebrow">Small mark. Endless curiosity.</div></footer>
+      <nav class="downloads" aria-label="Download SVG assets"><a href="athena-mark.svg" download>Black mark ↗</a><a href="athena-mark-white.svg" download>White mark ↗</a><a href="athena-app-icon.svg" download>App icon ↗</a><a href="athena-favicon.svg" download>Favicon ↗</a></nav>
+    </main>
+  </body>
+</html>

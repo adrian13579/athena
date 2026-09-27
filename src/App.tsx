@@ -5,6 +5,7 @@ import StudyChat, { welcomeMessage, type ChatMessage } from './components/StudyC
 import StudyDialog from './components/StudyDialog';
 import StudyLibrary from './components/StudyLibrary';
 import { useStudies } from './hooks/useStudies';
+import { sendStudyMessage } from './chat';
 
 const KnowledgeGraph = React.lazy(() => import('./KnowledgeGraph'));
 type DialogMode = 'create' | 'help' | null;
@@ -13,6 +14,7 @@ export default function App() {
   const [section, setSection] = useState<AppSection>('studies');
   const [selectedStudy, setSelectedStudy] = useState<Study | null>(null);
   const [conversations, setConversations] = useState<Record<string, ChatMessage[]>>({});
+  const [chatPending, setChatPending] = useState(false);
   const [dialogMode, setDialogMode] = useState<DialogMode>(null);
   const { studies, loadState, online, canCreate, addStudy, retry, markUnavailable } = useStudies();
 
@@ -28,8 +30,10 @@ export default function App() {
     );
   }
 
-  function sendMessage(text: string) {
+  async function sendMessage(text: string) {
     if (!selectedStudy || !text.trim()) return;
+    const study = selectedStudy;
+    const existingMessages = conversations[study.id] ?? [welcomeMessage(study)];
     const message: ChatMessage = {
       id: crypto.randomUUID(),
       role: 'you',
@@ -37,21 +41,55 @@ export default function App() {
     };
     setConversations((current) => ({
       ...current,
-      [selectedStudy.id]: [
-        ...(current[selectedStudy.id] ?? [welcomeMessage(selectedStudy)]),
-        message,
-      ],
+      [study.id]: [...existingMessages, message],
     }));
+    setChatPending(true);
+    try {
+      const history = existingMessages
+        .filter((item) => !item.id.startsWith('welcome-'))
+        .map((item) => ({
+          role: item.role === 'you' ? ('user' as const) : ('assistant' as const),
+          content: item.text,
+        }))
+        .slice(-40);
+      const answer = await sendStudyMessage(study, history, message.text);
+      setConversations((current) => ({
+        ...current,
+        [study.id]: [
+          ...(current[study.id] ?? []),
+          { id: crypto.randomUUID(), role: 'guide', text: answer },
+        ],
+      }));
+    } catch (error) {
+      setConversations((current) => ({
+        ...current,
+        [study.id]: [
+          ...(current[study.id] ?? []),
+          {
+            id: crypto.randomUUID(),
+            role: 'guide',
+            text:
+              error instanceof Error
+                ? error.message
+                : 'The study assistant could not respond. Try again shortly.',
+          },
+        ],
+      }));
+    } finally {
+      setChatPending(false);
+    }
   }
 
   return (
     <div className="app">
-      <AppHeader
-        section={section}
-        studyCount={studies.length}
-        onNavigate={navigate}
-        onHelp={() => setDialogMode('help')}
-      />
+      {!selectedStudy && (
+        <AppHeader
+          section={section}
+          studyCount={studies.length}
+          onNavigate={navigate}
+          onHelp={() => setDialogMode('help')}
+        />
+      )}
       <main className={selectedStudy ? 'study-chat-main' : section === 'graph' ? 'graph-main' : ''}>
         {selectedStudy ? (
           <StudyChat
@@ -59,6 +97,7 @@ export default function App() {
             messages={conversations[selectedStudy.id] ?? [welcomeMessage(selectedStudy)]}
             onBack={() => setSelectedStudy(null)}
             onSend={sendMessage}
+            isThinking={chatPending}
           />
         ) : (
           <>

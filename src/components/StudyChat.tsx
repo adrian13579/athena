@@ -1,6 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
-import { ArrowLeft, BookOpen, Send } from 'lucide-react';
+import { useEffect, useRef } from 'react';
+import { ArrowLeft } from 'lucide-react';
 import type { Study } from '../studies';
+import AthenaMark from './AthenaMark';
+import ChatComposer from './ChatComposer';
 
 export type ChatMessage = { id: string; role: 'guide' | 'you'; text: string };
 
@@ -17,43 +19,54 @@ export default function StudyChat({
   messages,
   onBack,
   onSend,
+  isThinking,
 }: {
   study: Study;
   messages: ChatMessage[];
   onBack: () => void;
-  onSend: (text: string) => void;
+  onSend: (text: string) => void | Promise<void>;
+  isThinking: boolean;
 }) {
-  const [draft, setDraft] = useState('');
   const feed = useRef<HTMLDivElement>(null);
+  const chat = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    feed.current?.scrollTo?.({ top: feed.current.scrollHeight, behavior: 'smooth' });
+    const viewport = window.visualViewport;
+    if (!viewport) return;
+    function syncViewport() {
+      if (!viewport || viewport.scale !== 1 || !chat.current) return;
+      chat.current.style.setProperty('--chat-viewport-height', `${viewport.height}px`);
+      chat.current.style.setProperty('--chat-viewport-offset', `${viewport.offsetTop}px`);
+    }
+    syncViewport();
+    viewport.addEventListener('resize', syncViewport);
+    viewport.addEventListener('scroll', syncViewport);
+    return () => {
+      viewport.removeEventListener('resize', syncViewport);
+      viewport.removeEventListener('scroll', syncViewport);
+    };
+  }, []);
+
+  useEffect(() => {
+    const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    feed.current?.scrollTo?.({
+      top: feed.current.scrollHeight,
+      behavior: reducedMotion ? 'instant' : 'smooth',
+    });
   }, [messages]);
 
-  function submit(event: React.FormEvent) {
-    event.preventDefault();
-    if (!draft.trim()) return;
-    onSend(draft);
-    setDraft('');
-  }
-
   return (
-    <section className="study-chat" aria-label={`Conversation for ${study.title}`}>
+    <section ref={chat} className="study-chat" aria-label={`Conversation for ${study.title}`}>
       <div className="chat-heading">
-        <button className="back-to-studies" onClick={onBack}>
-          <ArrowLeft size={17} />
-          All studies
+        <button
+          className="back-to-studies"
+          onClick={onBack}
+          aria-label="All studies"
+          title="All studies"
+        >
+          <ArrowLeft size={20} aria-hidden="true" />
         </button>
-        <div className="chat-study-title">
-          <span className={`chat-study-mark ${study.color}`}>
-            <BookOpen size={18} />
-          </span>
-          <div>
-            <span className="chat-study-category">{study.category} · STUDY SPACE</span>
-            <h1>{study.title}</h1>
-          </div>
-        </div>
-        {study.description && <p className="chat-study-description">{study.description}</p>}
+        <h1 title={study.title}>{study.title}</h1>
       </div>
       <div className="chat-body" ref={feed} aria-live="polite" aria-label="Study conversation">
         {messages.map((message) => (
@@ -61,36 +74,24 @@ export default function StudyChat({
             className={`chat-row ${message.role === 'you' ? 'from-you' : 'from-guide'}`}
             key={message.id}
           >
-            {message.role === 'guide' && <span className="chat-avatar">a✦</span>}
+            {message.role === 'guide' && (
+              <span className="chat-avatar">
+                <AthenaMark size={24} />
+              </span>
+            )}
             <div className="chat-bubble">
               <span className="chat-author">{message.role === 'you' ? 'You' : 'Study space'}</span>
               <p>{message.text}</p>
             </div>
           </div>
         ))}
+        {isThinking && (
+          <p className="chat-thinking" role="status">
+            Study space is thinking…
+          </p>
+        )}
       </div>
-      <form className="chat-composer" onSubmit={submit}>
-        <label className="sr-only" htmlFor="study-message">
-          Message this study
-        </label>
-        <textarea
-          id="study-message"
-          placeholder="Add a question or thought..."
-          value={draft}
-          rows={1}
-          onChange={(event) => setDraft(event.target.value)}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter' && !event.shiftKey) {
-              event.preventDefault();
-              event.currentTarget.form?.requestSubmit();
-            }
-          }}
-        />
-        <button type="submit" aria-label="Send message" disabled={!draft.trim()}>
-          <Send size={17} />
-        </button>
-        <span className="composer-hint">Enter to send · Shift + Enter for a new line</span>
-      </form>
+      <ChatComposer onSend={onSend} isThinking={isThinking} />
     </section>
   );
 }

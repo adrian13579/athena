@@ -1,4 +1,5 @@
 import { BookOpen, CircleHelp, Network } from 'lucide-react';
+import AthenaMark from './AthenaMark';
 
 export type AppSection = 'studies' | 'graph';
 
@@ -14,7 +15,7 @@ export default function AppHeader({
   onHelp: () => void;
 }) {
   return (
-    <header>
+    <header className="app-header">
       <a
         className="brand"
         href="#"
@@ -24,21 +25,24 @@ export default function AppHeader({
         }}
         aria-label="Athena home"
       >
-        <span className="brand-mark">
-          a<span>✦</span>
-        </span>
+        <AthenaMark className="brand-mark" />
         athena<span className="brand-dot">.</span>
       </a>
       <nav className="section-tabs" aria-label="Main sections">
         <button
           className={section === 'studies' ? 'active' : ''}
+          aria-current={section === 'studies' ? 'page' : undefined}
           onClick={() => onNavigate('studies')}
         >
-          <BookOpen size={18} />
+          <BookOpen size={18} aria-hidden="true" />
           Studies<span className="count">{studyCount}</span>
         </button>
-        <button className={section === 'graph' ? 'active' : ''} onClick={() => onNavigate('graph')}>
-          <Network size={18} />
+        <button
+          className={section === 'graph' ? 'active' : ''}
+          aria-current={section === 'graph' ? 'page' : undefined}
+          onClick={() => onNavigate('graph')}
+        >
+          <Network size={18} aria-hidden="true" />
           Knowledge Graph
         </button>
       </nav>

@@ -22,6 +22,7 @@ dom.window.HTMLDialogElement.prototype.close = function () {
 };
 const { render, screen, fireEvent, waitFor, cleanup, act } = await import('@testing-library/react');
 const { default: App } = await import('../src/App');
+const { default: ChatComposer } = await import('../src/components/ChatComposer');
 const json = (value: unknown, status = 200) => new Response(JSON.stringify(value), { status });
 const saved = (input: any) => ({
   ...input,
@@ -179,6 +180,90 @@ test('Study online UI', async (t) => {
         ),
       );
       cleanup();
+    });
+    await t.test(
+      'chat hides navigation and study details, and back restores the library',
+      async () => {
+        globalThis.fetch = async () =>
+          json([
+            saved({
+              id: 'focus',
+              title: 'Focused study',
+              description: 'Library description',
+              color: 'blue',
+            }),
+          ]);
+        render(<App />);
+        await screen.findByRole('heading', { name: 'Focused study' });
+        fireEvent.click(screen.getByRole('button', { name: /Personal Focused study/ }));
+        assert.equal(screen.queryByRole('navigation', { name: 'Main sections' }), null);
+        assert.equal(screen.queryByText('Library description'), null);
+        assert.equal(screen.queryByText(/PERSONAL.*STUDY SPACE/i), null);
+        assert.ok(screen.getByRole('heading', { name: 'Focused study' }));
+        assert.ok(screen.getByRole('textbox', { name: 'Message this study' }));
+        fireEvent.click(screen.getByRole('button', { name: 'All studies' }));
+        assert.ok(screen.getByRole('navigation', { name: 'Main sections' }));
+        assert.ok(screen.getByRole('heading', { name: 'Your studies' }));
+        cleanup();
+      },
+    );
+    await t.test('composer sends with Enter, preserves multiline and IME input, and resets', () => {
+      const sent: string[] = [];
+      const onSend = (text: string) => {
+        sent.push(text);
+      };
+      const view = render(<ChatComposer onSend={onSend} isThinking={false} />);
+      const input = screen.getByRole('textbox', {
+        name: 'Message this study',
+      }) as HTMLTextAreaElement;
+      assert.equal(
+        (screen.getByRole('button', { name: 'Send message' }) as HTMLButtonElement).disabled,
+        true,
+      );
+      fireEvent.change(input, { target: { value: '  First line\nSecond line  ' } });
+      fireEvent.keyDown(input, { key: 'Enter', shiftKey: true });
+      fireEvent.keyDown(input, { key: 'Enter', isComposing: true });
+      fireEvent.keyDown(input, { key: 'Enter', keyCode: 229 });
+      assert.deepEqual(sent, []);
+      fireEvent.keyDown(input, { key: 'Enter' });
+      assert.deepEqual(sent, ['First line\nSecond line']);
+      assert.equal(input.value, '');
+      assert.equal(document.activeElement, input);
+      view.rerender(<ChatComposer onSend={onSend} isThinking={true} />);
+      fireEvent.change(input, { target: { value: 'Next question' } });
+      fireEvent.keyDown(input, { key: 'Enter' });
+      assert.equal(sent.length, 1);
+      assert.equal(input.value, 'Next question');
+      cleanup();
+    });
+    await t.test('touch keyboards keep Enter for newlines and send using the button', () => {
+      const originalMatchMedia = Object.getOwnPropertyDescriptor(window, 'matchMedia');
+      Object.defineProperty(window, 'matchMedia', {
+        configurable: true,
+        value: (query: string) => ({ matches: query === '(pointer: coarse)' }),
+      });
+      try {
+        const sent: string[] = [];
+        render(
+          <ChatComposer
+            onSend={(text) => {
+              sent.push(text);
+            }}
+            isThinking={false}
+          />,
+        );
+        const input = screen.getByRole('textbox', { name: 'Message this study' });
+        fireEvent.change(input, { target: { value: 'Mobile question' } });
+        const defaultAllowed = fireEvent.keyDown(input, { key: 'Enter' });
+        assert.equal(defaultAllowed, true);
+        assert.deepEqual(sent, []);
+        fireEvent.click(screen.getByRole('button', { name: 'Send message' }));
+        assert.deepEqual(sent, ['Mobile question']);
+      } finally {
+        cleanup();
+        if (originalMatchMedia) Object.defineProperty(window, 'matchMedia', originalMatchMedia);
+        else Reflect.deleteProperty(window, 'matchMedia');
+      }
     });
   } finally {
     cleanup();

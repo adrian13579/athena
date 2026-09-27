@@ -24,3 +24,12 @@
 - Follow existing project conventions for component structure, styling, state management, routing, and data fetching.
 - Build accessible interfaces using semantic HTML, labels, keyboard support, and appropriate ARIA attributes.
 - Do not introduce dependencies when existing project utilities or native browser or React APIs are sufficient.
+
+## Responsive UI
+
+- Treat mobile friendliness as a requirement for every UI change. Preserve Athena's simple black-and-white visual identity and existing content and navigation concepts.
+- Keep desktop layouts stable; let navigation, toolbars, cards, dialogs, and chat controls reflow on smaller screens without horizontal page overflow or clipped actions.
+- Verify representative phone widths (320px and 390px), tablet (768px), and desktop (1280px), including long titles and empty, loading, and error states when relevant.
+- Provide touch targets of at least 44px for primary controls, visible keyboard focus, accessible labels, and native keyboard and touch behavior where possible. Never require hover to access essential actions.
+- Use readable text and at least 16px text in mobile form controls to avoid unwanted input zoom. Account for dynamic viewport height, safe areas, and the on-screen keyboard in dialogs and chat.
+- Honor reduced-motion preferences and keep animations subtle. Prefer CSS and native browser features with graceful fallbacks over new UI dependencies.

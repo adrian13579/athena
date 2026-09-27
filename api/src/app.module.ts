@@ -8,6 +8,7 @@ import { StudyEntity } from './studies/study.entity.js';
 import { StudiesModule } from './studies/studies.module.js';
 import { KnowledgeModule } from './knowledge/knowledge.module.js';
 import { knowledgeEntities } from './knowledge/knowledge.entities.js';
+import { ChatModule } from './chat/chat.module.js';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { knowledgeEntities } from './knowledge/knowledge.entities.js';
     }),
     StudiesModule,
     KnowledgeModule,
+    ChatModule,
   ],
   controllers: [HealthController],
 })

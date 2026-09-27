@@ -6,6 +6,7 @@ import {
   ChevronDown,
   Grid2X2,
   List,
+  ListFilter,
   Plus,
   Search,
   X,
@@ -68,6 +69,7 @@ export default function StudyLibrary({
         </label>
         <div className="toolbar-right">
           <label className="select-wrap">
+            <ListFilter size={16} className="select-icon" aria-hidden="true" />
             <select
               aria-label="Filter by category"
               value={filter}
@@ -77,10 +79,13 @@ export default function StudyLibrary({
                 <option key={category}>{category}</option>
               ))}
             </select>
-            <ChevronDown size={14} />
+            <span className="select-value" aria-hidden="true">
+              {filter}
+            </span>
+            <ChevronDown size={14} className="select-chevron" aria-hidden="true" />
           </label>
           <label className="select-wrap sort">
-            <ArrowDownUp size={15} />
+            <ArrowDownUp size={16} className="select-icon" aria-hidden="true" />
             <select
               aria-label="Sort studies"
               value={sort}
@@ -89,6 +94,10 @@ export default function StudyLibrary({
               <option value="recent">Most recent</option>
               <option value="name">Name A–Z</option>
             </select>
+            <span className="select-value" aria-hidden="true">
+              {sort === 'name' ? 'Name A–Z' : 'Most recent'}
+            </span>
+            <ChevronDown size={14} className="select-chevron" aria-hidden="true" />
           </label>
           <div className="view-toggle">
             <button
