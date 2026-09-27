@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import type { Study } from './main';
+import type { Study } from './studies';
 
 type GraphNode = {
   x: number;

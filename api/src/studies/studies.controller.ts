@@ -1,17 +1,22 @@
-import { Body, Controller, Get, Put } from '@nestjs/common';
+import { Body, Controller, Get, GoneException, Inject, Post, Put } from '@nestjs/common';
 import { StudiesService } from './studies.service';
 
 @Controller('studies')
 export class StudiesController {
-  constructor(private readonly studiesService: StudiesService) {}
+  constructor(@Inject(StudiesService) private readonly studiesService: StudiesService) {}
 
   @Get()
   findAll() {
     return this.studiesService.findAll();
   }
 
+  @Post()
+  create(@Body() body: unknown) {
+    return this.studiesService.create(body);
+  }
+
   @Put('sync')
-  sync(@Body() body: unknown) {
-    return this.studiesService.sync(body);
+  sync() {
+    throw new GoneException('Study synchronization has been retired. Reload the application.');
   }
 }

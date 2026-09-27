@@ -447,9 +447,6 @@ dialog textarea {
 dialog textarea {
   min-height: 100px;
 }
-dialog .notes {
-  min-height: 210px;
-}
 .modal-icon {
   display: inline-grid;
   place-items: center;
@@ -462,13 +459,7 @@ dialog .notes {
   padding: 7px 12px;
   font-size: 12px;
 }
-.saved {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 11px;
-  color: var(--muted);
-}
+
 @media (min-width: 1500px) {
   .study-grid:not(.list-layout) {
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -572,4 +563,9 @@ dialog .notes {
   dialog {
     padding: 28px;
   }
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }

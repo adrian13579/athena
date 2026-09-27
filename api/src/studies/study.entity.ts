@@ -23,9 +23,6 @@ export class StudyEntity {
   @Column({ name: 'study_date', type: 'date' })
   date!: string;
 
-  @Column({ type: 'text', default: '' })
-  notes!: string;
-
   @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
   updatedAt!: Date;
 }
