@@ -2,13 +2,14 @@ export type Study = {
   id: string;
   title: string;
   description: string;
+  learningGoals: string[];
   category: string;
   color: string;
   sources: number;
   date: string;
   updatedAt: string;
 };
-export type CreateStudy = Pick<Study, 'id' | 'title' | 'description' | 'color'>;
+export type CreateStudy = Pick<Study, 'id' | 'title' | 'description' | 'learningGoals' | 'color'>;
 
 export class StudyRequestError extends Error {
   constructor(public readonly status: number) {

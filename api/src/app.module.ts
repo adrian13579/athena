@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { CreateStudies1790294400000 } from './database/create-studies.migration.js';
 import { CreateKnowledgeGraph1790371200000 } from './database/create-knowledge-graph.migration.js';
 import { ResetStudies1790460800000 } from './database/reset-studies.migration.js';
+import { AddStudyLearningGoals1790812800000 } from './database/add-study-learning-goals.migration.js';
 import { HealthController } from './health.controller.js';
 import { StudyEntity } from './studies/study.entity.js';
 import { StudiesModule } from './studies/studies.module.js';
@@ -21,6 +22,7 @@ import { ChatModule } from './chat/chat.module.js';
         CreateStudies1790294400000,
         CreateKnowledgeGraph1790371200000,
         ResetStudies1790460800000,
+        AddStudyLearningGoals1790812800000,
       ],
       migrationsRun: true,
       synchronize: false,

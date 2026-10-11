@@ -40,7 +40,25 @@ Run `npm run dev` to start the API with TypeScript watch mode and the Vite clien
 
 ## Study creation
 
-`POST /api/studies` accepts exactly `id` (UUID v4), `title` (nonblank, at most 90 characters), `description` (string, at most 220 characters; use an empty string when omitted in the UI), and `color` (`lavender`, `green`, `peach`, `blue`, or `pink`). Titles and descriptions are trimmed. IDs are normalized to lowercase. The server assigns category `Personal`, zero sources, the UTC calendar date, and `updatedAt`.
+`POST /api/studies` accepts `id` (UUID v4), `title` (nonblank, at most 90 characters), `description` (string, at most 220 characters), `learningGoals` (optional array of up to 10 nonblank strings, each at most 180 characters), and `color` (`lavender`, `green`, `peach`, `blue`, or `pink`). Omitted descriptions and learning goals default to empty values. Titles, descriptions, and goals are trimmed; IDs are normalized to lowercase. Learning goals are stored separately from the description in the PostgreSQL `learning_goals` text-array column.
+
+For example, a computer networks study can be created with:
+
+```json
+{
+  "id": "eb19ae1c-51db-41e4-a265-f5fcac240c65",
+  "title": "Computer Networks",
+  "description": "An introduction to how devices exchange data across local and global networks.",
+  "learningGoals": [
+    "Explain how packets carry data across a network.",
+    "Describe the roles of routers, switches, and DNS.",
+    "Compare TCP and UDP."
+  ],
+  "color": "blue"
+}
+```
+
+The server assigns category `Personal`, zero sources, the UTC calendar date, and `updatedAt`.
 
 Creation returns HTTP 201 and the saved record. Retrying the same ID with identical normalized content returns the same record with HTTP 201; different content returns 409. Invalid requests return 400. Notes and server-owned fields are rejected in creation requests. Listing returns all studies ordered by date descending, then ID ascending. There are no edit or delete routes.
 

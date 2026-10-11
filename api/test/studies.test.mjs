@@ -19,6 +19,7 @@ import {
 import { CreateStudies1790294400000 } from '../dist/database/create-studies.migration.js';
 import { CreateKnowledgeGraph1790371200000 } from '../dist/database/create-knowledge-graph.migration.js';
 import { ResetStudies1790460800000 } from '../dist/database/reset-studies.migration.js';
+import { AddStudyLearningGoals1790812800000 } from '../dist/database/add-study-learning-goals.migration.js';
 
 // Always provision a new database: never migrate or reset the supplied administration database.
 test('Study migration, API contract, and persistent storage', async (t) => {
@@ -57,7 +58,7 @@ test('Study migration, API contract, and persistent storage', async (t) => {
       result: 1,
     });
     await db.destroy();
-    options.migrations.push(ResetStudies1790460800000);
+    options.migrations.push(ResetStudies1790460800000, AddStudyLearningGoals1790812800000);
     db = await new DataSource(options).initialize();
     await db.runMigrations();
     await t.test('reset preserves knowledge and removes studies, links, and notes', async () => {

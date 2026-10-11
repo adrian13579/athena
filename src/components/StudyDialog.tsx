@@ -30,6 +30,7 @@ export default function StudyDialog({
 }) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [learningGoalsText, setLearningGoalsText] = useState('');
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
   const pendingCreate = useRef<CreateStudy | null>(null);
@@ -49,10 +50,19 @@ export default function StudyDialog({
   async function submit(event: React.FormEvent) {
     event.preventDefault();
     if (!canCreate || submitting.current || !title.trim()) return;
+    const learningGoals = learningGoalsText
+      .split(/\r?\n/)
+      .map((goal) => goal.trim())
+      .filter(Boolean);
+    if (learningGoals.length > 10 || learningGoals.some((goal) => goal.length > 180)) {
+      setSaveError('Use up to 10 learning goals, with no more than 180 characters each.');
+      return;
+    }
     pendingCreate.current ??= {
       id: crypto.randomUUID(),
       title: title.trim(),
       description: description.trim(),
+      learningGoals,
       color: ['lavender', 'green', 'peach', 'blue', 'pink'][studyCount % 5],
     };
     submitting.current = true;
@@ -63,6 +73,7 @@ export default function StudyDialog({
       pendingCreate.current = null;
       setTitle('');
       setDescription('');
+      setLearningGoalsText('');
       onCreated();
     } catch (error) {
       if (error instanceof StudyRequestError && (error.status === 400 || error.status === 409)) {
@@ -123,6 +134,16 @@ export default function StudyDialog({
               value={description}
               onChange={(event) => setDescription(event.target.value)}
               placeholder="Add a description"
+            />
+          </label>
+          <label>
+            Learning goals (one per line, up to 10)
+            <textarea
+              disabled={saving || !canCreate || pendingCreate.current !== null}
+              maxLength={1800}
+              value={learningGoalsText}
+              onChange={(event) => setLearningGoalsText(event.target.value)}
+              placeholder={'Explain how packets are routed\nCompare TCP and UDP'}
             />
           </label>
           <button className="primary-button" type="submit" disabled={saving || !canCreate}>

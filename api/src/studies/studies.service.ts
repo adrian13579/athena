@@ -7,6 +7,7 @@ function parseStudy(input: unknown) {
   if (!input || typeof input !== 'object' || Array.isArray(input))
     throw new BadRequestException('Expected a study.');
   const body = input as Record<string, unknown>;
+  const learningGoals = body.learningGoals === undefined ? [] : body.learningGoals;
   if (
     typeof body.id !== 'string' ||
     !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(body.id) ||
@@ -15,17 +16,25 @@ function parseStudy(input: unknown) {
     body.title.length > 90 ||
     typeof body.description !== 'string' ||
     body.description.length > 220 ||
+    !Array.isArray(learningGoals) ||
+    learningGoals.length > 10 ||
+    learningGoals.some(
+      (goal) => typeof goal !== 'string' || !goal.trim() || goal.trim().length > 180,
+    ) ||
     typeof body.color !== 'string' ||
     !['lavender', 'green', 'peach', 'blue', 'pink'].includes(body.color) ||
-    Object.keys(body).some((key) => !['id', 'title', 'description', 'color'].includes(key))
+    Object.keys(body).some(
+      (key) => !['id', 'title', 'description', 'learningGoals', 'color'].includes(key),
+    )
   )
     throw new BadRequestException(
-      'Expected a UUID, title (1-90 characters), description (up to 220 characters), and a supported color.',
+      'Expected a UUID, title (1-90 characters), description (up to 220 characters), up to 10 learning goals (180 characters each), and a supported color.',
     );
   return {
     id: body.id.toLowerCase(),
     title: body.title.trim(),
     description: body.description.trim(),
+    learningGoals: (learningGoals as string[]).map((goal) => goal.trim()),
     color: body.color,
   };
 }
@@ -58,6 +67,7 @@ export class StudiesService {
     if (
       saved.title !== study.title ||
       saved.description !== study.description ||
+      JSON.stringify(saved.learningGoals) !== JSON.stringify(study.learningGoals) ||
       saved.color !== study.color
     ) {
       throw new ConflictException('This study ID already belongs to a different study.');

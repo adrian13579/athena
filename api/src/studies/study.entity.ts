@@ -11,6 +11,9 @@ export class StudyEntity {
   @Column({ type: 'text', default: '' })
   description!: string;
 
+  @Column({ name: 'learning_goals', type: 'text', array: true, default: () => "ARRAY[]::TEXT[]" })
+  learningGoals!: string[];
+
   @Column({ type: 'text', default: 'Personal' })
   category!: string;
 

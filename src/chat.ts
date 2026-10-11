@@ -11,7 +11,12 @@ export async function sendStudyMessage(
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      study: { title: study.title, category: study.category, description: study.description },
+      study: {
+        title: study.title,
+        category: study.category,
+        description: study.description,
+        learningGoals: study.learningGoals ?? [],
+      },
       history,
       message,
     }),

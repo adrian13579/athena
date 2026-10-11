@@ -29,6 +29,7 @@ export default function StudyChat({
 }) {
   const feed = useRef<HTMLDivElement>(null);
   const chat = useRef<HTMLElement>(null);
+  const learningGoals = study.learningGoals ?? [];
 
   useEffect(() => {
     const viewport = window.visualViewport;
@@ -69,6 +70,16 @@ export default function StudyChat({
         <h1 title={study.title}>{study.title}</h1>
       </div>
       <div className="chat-body" ref={feed} aria-live="polite" aria-label="Study conversation">
+        {learningGoals.length > 0 && (
+          <section className="study-goals" aria-labelledby="study-goals-title">
+            <h2 id="study-goals-title">Learning goals</h2>
+            <ul>
+              {learningGoals.map((goal, index) => (
+                <li key={`${index}-${goal}`}>{goal}</li>
+              ))}
+            </ul>
+          </section>
+        )}
         {messages.map((message) => (
           <div
             className={`chat-row ${message.role === 'you' ? 'from-you' : 'from-guide'}`}
