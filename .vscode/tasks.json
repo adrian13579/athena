@@ -10,7 +10,7 @@
         "-ExecutionPolicy",
         "Bypass",
         "-Command",
-        "$ports = @(3001, 5173); foreach ($port in $ports) { $owners = Get-NetTCPConnection -State Listen -LocalPort $port -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique; foreach ($owner in $owners) { if ($owner -ne $PID) { Stop-Process -Id $owner -Force -ErrorAction Stop; Write-Output \"Stopped process $owner on port $port\" } } }"
+        "$ports = @(3001, 5173); foreach ($port in $ports) { $owners = @(Get-NetTCPConnection -State Listen -LocalPort $port -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique); if ($owners.Count -eq 0) { Write-Output \"No process is listening on port $port\"; continue }; foreach ($owner in $owners) { if ($owner -ne $PID) { Stop-Process -Id $owner -Force -ErrorAction Stop; Write-Output \"Stopped process $owner on port $port\" } } }"
       ],
       "problemMatcher": []
     },
