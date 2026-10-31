@@ -1,4 +1,4 @@
-import React, { Suspense, useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useRef, useState } from 'react';
 import type { Study } from './studies';
 import AppHeader, { type AppSection } from './components/AppHeader';
 import StudyChat, { welcomeMessage, type ChatMessage } from './components/StudyChat';
@@ -25,6 +25,8 @@ export default function App() {
   const [selectedStudy, setSelectedStudy] = useState<Study | null>(null);
   const [conversations, setConversations] = useState<Record<string, ChatMessage[]>>({});
   const [chatPending, setChatPending] = useState(false);
+  const pendingMessage = useRef(false);
+  const diagramContexts = useRef<Record<string, Record<string, string>>>({});
   const [dialogMode, setDialogMode] = useState<DialogMode>(null);
   const { studies, loadState, online, canCreate, addStudy, retry, markUnavailable } = useStudies();
 
@@ -49,7 +51,8 @@ export default function App() {
   }
 
   async function sendMessage(text: string) {
-    if (!selectedStudy || !text.trim()) return;
+    if (!selectedStudy || !text.trim() || pendingMessage.current) return;
+    pendingMessage.current = true;
     const study = selectedStudy;
     const existingMessages = conversations[study.id] ?? [welcomeMessage(study)];
     const message: ChatMessage = {
@@ -67,15 +70,28 @@ export default function App() {
         .filter((item) => !item.id.startsWith('welcome-'))
         .map((item) => ({
           role: item.role === 'you' ? ('user' as const) : ('assistant' as const),
-          content: item.text,
+          content: item.text.slice(0, 4000),
         }))
         .slice(-40);
-      const answer = await sendStudyMessage(study, history, message.text);
+      const context = existingMessages
+        .flatMap((item) => item.apps ?? [])
+        .slice(-4)
+        .map((app) => ({
+          appId: app.id,
+          summary: diagramContexts.current[study.id]?.[app.id] ?? '',
+        }));
+      const answer = await sendStudyMessage(study, history, message.text, context);
       setConversations((current) => ({
         ...current,
         [study.id]: [
           ...(current[study.id] ?? []),
-          { id: crypto.randomUUID(), role: 'guide', text: answer },
+          {
+            id: crypto.randomUUID(),
+            role: 'guide',
+            text: answer.answer,
+            apps: answer.apps,
+            warnings: answer.warnings,
+          },
         ],
       }));
     } catch (error) {
@@ -94,6 +110,7 @@ export default function App() {
         ],
       }));
     } finally {
+      pendingMessage.current = false;
       setChatPending(false);
     }
   }
@@ -118,6 +135,14 @@ export default function App() {
             onBack={() => setSelectedStudy(null)}
             onSend={sendMessage}
             isThinking={chatPending}
+            theme={theme}
+            onDiagramContext={(id, summary) => {
+              const studyId = selectedStudy.id;
+              diagramContexts.current[studyId] = {
+                ...diagramContexts.current[studyId],
+                [id]: summary,
+              };
+            }}
           />
         ) : (
           <>

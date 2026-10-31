@@ -1,10 +1,19 @@
-import { useEffect, useRef } from 'react';
+import { lazy, Suspense, useEffect, useRef } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import type { Study } from '../studies';
 import AthenaMark from './AthenaMark';
 import ChatComposer from './ChatComposer';
+import type { DiagramAttachment } from '../mcp';
 
-export type ChatMessage = { id: string; role: 'guide' | 'you'; text: string };
+const McpAppView = lazy(() => import('./McpAppView'));
+
+export type ChatMessage = {
+  id: string;
+  role: 'guide' | 'you';
+  text: string;
+  apps?: DiagramAttachment[];
+  warnings?: string[];
+};
 
 export function welcomeMessage(study: Study): ChatMessage {
   return {
@@ -20,12 +29,16 @@ export default function StudyChat({
   onBack,
   onSend,
   isThinking,
+  theme,
+  onDiagramContext,
 }: {
   study: Study;
   messages: ChatMessage[];
   onBack: () => void;
   onSend: (text: string) => void | Promise<void>;
   isThinking: boolean;
+  theme: 'dark' | 'white';
+  onDiagramContext: (id: string, summary: string) => void;
 }) {
   const feed = useRef<HTMLDivElement>(null);
   const chat = useRef<HTMLElement>(null);
@@ -82,7 +95,7 @@ export default function StudyChat({
         )}
         {messages.map((message) => (
           <div
-            className={`chat-row ${message.role === 'you' ? 'from-you' : 'from-guide'}`}
+            className={`chat-row ${message.role === 'you' ? 'from-you' : 'from-guide'} ${message.apps?.length ? 'has-app' : ''}`}
             key={message.id}
           >
             {message.role === 'guide' && (
@@ -93,6 +106,22 @@ export default function StudyChat({
             <div className="chat-bubble">
               <span className="chat-author">{message.role === 'you' ? 'You' : 'Study space'}</span>
               <p>{message.text}</p>
+              {message.warnings?.map((warning) => (
+                <p className="diagram-warning" key={warning} role="status">
+                  {warning}
+                </p>
+              ))}
+              {message.apps?.map((app) => (
+                <Suspense key={app.id} fallback={<p role="status">Loading diagram…</p>}>
+                  <McpAppView
+                    app={app}
+                    theme={theme}
+                    onContext={onDiagramContext}
+                    onSend={onSend}
+                    isThinking={isThinking}
+                  />
+                </Suspense>
+              ))}
             </div>
           </div>
         ))}

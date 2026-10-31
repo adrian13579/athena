@@ -7,6 +7,9 @@ import {
 } from '@nestjs/common';
 import { Annotation, END, START, StateGraph } from '@langchain/langgraph';
 import { ChatOpenRouter, OpenRouterError } from '@langchain/openrouter';
+import { ExcalidrawMcpService } from '../mcp/excalidraw-mcp.service.js';
+import { runStudyAgent, type DiagramContext, type StudyAgentReply } from './study-agent.js';
+import { z } from 'zod';
 
 type ChatTurn = { role: 'user' | 'assistant'; content: string };
 type StudyContext = {
@@ -15,13 +18,21 @@ type StudyContext = {
   description: string;
   learningGoals: string[];
 };
-type ChatInput = { study: StudyContext; history: ChatTurn[]; message: string };
+type ChatInput = {
+  study: StudyContext;
+  history: ChatTurn[];
+  message: string;
+  diagramContext: DiagramContext[];
+};
 
 const StudyChatState = Annotation.Root({
   study: Annotation<StudyContext>(),
   history: Annotation<ChatTurn[]>(),
   message: Annotation<string>(),
   answer: Annotation<string>(),
+  diagramContext: Annotation<DiagramContext[]>(),
+  apps: Annotation<StudyAgentReply['apps']>(),
+  warnings: Annotation<string[]>(),
 });
 
 function parseChatInput(input: unknown): ChatInput {
@@ -35,6 +46,10 @@ function parseChatInput(input: unknown): ChatInput {
   }
   const details = study as Record<string, unknown>;
   const learningGoals = details.learningGoals === undefined ? [] : details.learningGoals;
+  const diagramContext = z
+    .array(z.object({ appId: z.uuid(), summary: z.string().max(8000) }).strict())
+    .max(4)
+    .safeParse(body.diagramContext ?? []);
   if (
     typeof details.title !== 'string' ||
     !details.title.trim() ||
@@ -61,7 +76,10 @@ function parseChatInput(input: unknown): ChatInput {
         typeof (turn as Record<string, unknown>).content !== 'string' ||
         ((turn as Record<string, unknown>).content as string).length > 4000,
     ) ||
-    Object.keys(body).some((key) => !['study', 'history', 'message'].includes(key))
+    !diagramContext.success ||
+    Object.keys(body).some(
+      (key) => !['study', 'history', 'message', 'diagramContext'].includes(key),
+    )
   ) {
     throw new BadRequestException('Study chat input is invalid or exceeds the conversation limit.');
   }
@@ -75,6 +93,7 @@ function parseChatInput(input: unknown): ChatInput {
     },
     history: body.history as ChatTurn[],
     message: body.message.trim(),
+    diagramContext: diagramContext.data!,
   };
 }
 
@@ -82,7 +101,9 @@ function parseChatInput(input: unknown): ChatInput {
 export class StudyChatService {
   private readonly logger = new Logger(StudyChatService.name);
 
-  async reply(input: unknown): Promise<{ answer: string }> {
+  constructor(private readonly mcp: ExcalidrawMcpService) {}
+
+  async reply(input: unknown): Promise<StudyAgentReply> {
     const chat = parseChatInput(input);
     if (!process.env.OPENROUTER_API_KEY) {
       throw new ServiceUnavailableException(
@@ -107,25 +128,25 @@ export class StudyChatService {
           `Description: ${state.study.description || 'No description provided.'}`,
           `Learning goals: ${state.study.learningGoals.length ? state.study.learningGoals.join('; ') : 'No learning goals provided.'}`,
         ].join('\n');
-        const response = await model.invoke([
-          { role: 'system', content: systemPrompt },
-          ...state.history.map((turn) => ({ role: turn.role, content: turn.content })),
-          { role: 'user', content: state.message },
-        ]);
-        const answer =
-          typeof response.content === 'string'
-            ? response.content
-            : response.content.map((part) => ('text' in part ? part.text : '')).join('');
-        return { answer };
+        return runStudyAgent(
+          model,
+          [
+            { role: 'system', content: systemPrompt },
+            ...state.history.map((turn) => ({ role: turn.role, content: turn.content })),
+            { role: 'user', content: state.message },
+          ],
+          this.mcp,
+          state.diagramContext,
+        );
       })
       .addEdge(START, 'respond')
       .addEdge('respond', END)
       .compile();
 
     try {
-      const result = await graph.invoke({ ...chat, answer: '' });
+      const result = await graph.invoke({ ...chat, answer: '', apps: [], warnings: [] });
       if (!result.answer.trim()) throw new Error('The model returned an empty response.');
-      return { answer: result.answer.trim() };
+      return { answer: result.answer.trim(), apps: result.apps, warnings: result.warnings };
     } catch (error) {
       if (OpenRouterError.isInstance(error)) {
         this.logger.error(
